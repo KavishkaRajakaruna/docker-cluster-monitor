@@ -1,0 +1,45 @@
+version: "3"
+services:
+    pgsql-server:
+        image: postgres:latest
+        ports: 
+            - "5434:5432"
+        environment:
+            - POSTGRES_USER=root
+            - POSTGRES_PASSWORD=password
+            - APP_DB_USER=zabix
+            - APP_DB_PASS=zabix
+            - APP_DB_NAME=zabix
+
+    zabix-server:
+        image: zabbix/zabbix-server-pgsql
+        environment:
+            - DB_SERVER_HOST=pgsql-server
+            - POSTGRES_USER=root
+            - POSTGRES_PASSWORD=password
+        ports: 
+            - "10051:10051"
+
+    zabix-frontend:
+        image: zabbix/zabbix-web-nginx-pgsql
+        environment: 
+            - DB_SERVER_HOST=pgsql-server
+            - POSTGRES_USER=root
+            - POSTGRES_PASSWORD=password
+            - ZBX_SERVER_HOST="zabix-server"
+            - PHP_TZ=Asia/Colombo
+        links: 
+            - pgsql-server:postgres
+        ports: 
+            - "80:8080"
+
+
+    zabix-java-gateway:
+        image: zabbix/zabbix-java-gateway
+        links: 
+            - zabix-server:zabbix-server
+ 
+
+
+
+
